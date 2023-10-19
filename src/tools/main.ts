@@ -10,6 +10,7 @@ import { setTermination } from "../utils/setTermination";
 import { shuf } from "../utils/shuf";
 import { traceroute } from "../utils/traceroute";
 import { wait } from "../utils/wait";
+import { extractHistoryDomains } from "../utils/extractHistoryDomains";
 
 interface MainProps {
   historyPath: string;
@@ -22,18 +23,20 @@ const main = async ({ historyPath, ttl, delay }: MainProps) => {
 
   await copy({ inputPath: historyPath, outputPath: outfile });
 
-  const { curlDomains, pingDomains, tracerouteDomains } = await extractHistory({
+  const { pingDomains, tracerouteDomains } = await extractHistoryDomains({
     inputFile: outfile,
   }).then((domains) => {
-    const curlDomains = shuf(domains);
-    const pingDomains = shuf(curlDomains);
+    const pingDomains = domains;
     const tracerouteDomains = shuf(pingDomains);
 
     return {
-      curlDomains,
       pingDomains,
       tracerouteDomains,
     };
+  });
+
+  const curlDomains = await extractHistory({
+    inputFile: outfile,
   });
 
   await rm({ file: outfile });
