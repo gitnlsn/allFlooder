@@ -9,6 +9,8 @@ export const extractHistory = async ({ inputFile }: ExtractHistoryProps) => {
     `
     sqlite3 ${inputFile} 'select url from urls;' |
         grep -Pi '^(https|http)://(([a-zA-Z](-?[a-zA-Z0-9])*)\.)+[a-zA-Z]{2,}' |
+        sort -u |
+        shuf | shuf | shuf |
         jq -R | jq -s --compact-output
     `,
     { maxBuffer: 1024 * 1000 * 512 }

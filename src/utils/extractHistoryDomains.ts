@@ -10,7 +10,7 @@ export const extractHistoryDomains = async ({
   return await execPromise(
     `
     sqlite3 ${inputFile} 'select url from urls;' |
-        grep -Pio '(https|http)://(([a-zA-Z](-?[a-zA-Z0-9])*)\.)+[a-zA-Z]{2,}' |
+        grep -Pio '^(https|http)://(([a-zA-Z](-?[a-zA-Z0-9])*)\.)+[a-zA-Z]{2,}' |
         cut -d '/' -f '3' |
         sort -u |
         shuf | shuf | shuf |

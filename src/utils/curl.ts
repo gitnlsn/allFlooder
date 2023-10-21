@@ -1,10 +1,13 @@
 import { execPromise } from "./execPromise";
+import { randomContentType } from "./randomContentType";
+import { randomCurlMethod } from "./randomCurlMethod";
 
 interface CurlProps {
   url: string;
+  randomMethod?: boolean;
 }
 
-export const curl = async ({ url }: CurlProps) => {
+export const curl = async ({ url, randomMethod = false }: CurlProps) => {
   return await execPromise(`
     curl '${url}' -sS \
         -H 'accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7' \
@@ -19,6 +22,9 @@ export const curl = async ({ url }: CurlProps) => {
         -H 'sec-fetch-user: ?1' \
         -H 'upgrade-insecure-requests: 1' \
         -H 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36' \
-        --compressed --location --insecure >/dev/null
+        --compressed --location --insecure --max-redirs 1000 \
+        ${randomMethod ? `-X ${randomCurlMethod()}` : ""} \
+        ${randomMethod ? `-H ${randomContentType()}` : ""} \
+        >/dev/null
     `);
 };

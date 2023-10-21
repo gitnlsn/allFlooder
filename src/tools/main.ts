@@ -11,6 +11,7 @@ import { shuf } from "../utils/shuf";
 import { traceroute } from "../utils/traceroute";
 import { wait } from "../utils/wait";
 import { extractHistoryDomains } from "../utils/extractHistoryDomains";
+import { filterSafeURL } from "../utils/filterSafeURL";
 
 interface MainProps {
   historyPath: string;
@@ -37,28 +38,38 @@ const main = async ({ historyPath, ttl, delay }: MainProps) => {
 
   const curlDomains = await extractHistory({
     inputFile: outfile,
-  });
+  }).then((domains) => filterSafeURL(domains));
 
   await rm({ file: outfile });
 
   const curlPromise = consumer(curlDomains, async (domain) => {
     await wait(delay);
-    return await curl({ url: domain });
+    await curl({ url: domain }).catch(console.error);
+  });
+
+  const curlRandomMethodPromise = consumer(curlDomains, async (domain) => {
+    await wait(delay);
+    await curl({ url: domain, randomMethod: true }).catch(console.error);
   });
 
   const pingPromise = consumer(pingDomains, async (domain) => {
     await wait(delay);
-    return await ping({ domain });
+    await ping({ domain }).catch(console.error);
   });
 
   const traceroutePromise = consumer(tracerouteDomains, async (domain) => {
     await wait(delay);
-    return await traceroute({ domain });
+    await traceroute({ domain }).catch(console.error);
   });
 
   setTermination(ttl);
 
-  await Promise.all([curlPromise, pingPromise, traceroutePromise]);
+  await Promise.all([
+    curlPromise,
+    curlRandomMethodPromise,
+    pingPromise,
+    traceroutePromise,
+  ]);
 };
 
 const inputArgs = process.argv.slice(2);
