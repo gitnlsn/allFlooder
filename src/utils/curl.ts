@@ -6,7 +6,7 @@ interface CurlProps {
 
 export const curl = async ({ url }: CurlProps) => {
   return await execPromise(`
-    curl ${url} -sS \
+    curl '${url}' -sS \
         -H 'accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7' \
         -H 'accept-language: en' \
         -H 'cache-control: max-age=0' \

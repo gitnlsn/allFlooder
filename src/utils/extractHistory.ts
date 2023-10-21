@@ -5,8 +5,12 @@ interface ExtractHistoryProps {
 }
 
 export const extractHistory = async ({ inputFile }: ExtractHistoryProps) => {
-  return await execPromise(`
+  return await execPromise(
+    `
     sqlite3 ${inputFile} 'select url from urls;' |
+        grep -Pi '^(https|http)://(([a-zA-Z](-?[a-zA-Z0-9])*)\.)+[a-zA-Z]{2,}' |
         jq -R | jq -s --compact-output
-    `).then(({ stdout }) => JSON.parse(stdout) as string[]);
+    `,
+    { maxBuffer: 1024 * 1000 * 512 }
+  ).then(({ stdout }) => JSON.parse(stdout) as string[]);
 };
