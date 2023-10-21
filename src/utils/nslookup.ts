@@ -1,11 +1,12 @@
 import { execPromise } from "./execPromise";
 
-interface TracerouteProps {
+interface nslookupProps {
   domain: string;
+  server: string;
 }
 
-export const traceroute = async ({ domain }: TracerouteProps) => {
-  return await execPromise(`traceroute -n -m 8 ${domain}`)
+export const nslookup = async ({ domain, server }: nslookupProps) => {
+  return await execPromise(`nslookup ${domain} ${server}`)
     .then(({ stdout, stderr }) => ({ stdout, stderr }))
     .catch(({ stdout, stderr }) => ({ stdout, stderr }));
 };

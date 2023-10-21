@@ -1,11 +1,10 @@
-import { consume } from "../utils/consume";
 import { copy } from "../utils/copy";
-import { curl } from "../utils/curl";
-import { extractHistory } from "../utils/extractHistory";
+import { extractHistoryDomains } from "../utils/extractHistoryDomains";
 import { makeTemp } from "../utils/mkTemp";
 import { rm } from "../utils/rm";
+import { consume } from "../utils/consume";
 import { setTermination } from "../utils/setTermination";
-import { parseValidURL } from "../utils/parseValidURL";
+import { testDomain } from "../utils/testDomain";
 
 interface MainProps {
   historyPath: string;
@@ -20,32 +19,30 @@ const main = async ({ historyPath, ttl, threads }: MainProps) => {
 
   await copy({ inputPath: historyPath, outputPath: outfile });
 
-  const curlDomains = await extractHistory({
+  const allDomains = await extractHistoryDomains({
     inputFile: outfile,
-  }).then((domains) => parseValidURL(domains));
+  }).then((domains) =>
+    domains
+      .filter((domain) => !domain.includes("localhost"))
+      .filter((domain) => domain.split(".").length >= 2)
+  );
 
   await rm({ file: outfile });
 
-  const curlPromise = consume({
-    stack: curlDomains,
+  const checkRedirectionPromises = consume({
+    stack: allDomains,
     runnable: async (domain) => {
-      await curl({ url: domain, timeout: 1 });
+      const result = await testDomain(domain);
+      console.log(result);
     },
     threads,
   });
 
-  const curlRandomMethodPromise = consume({
-    stack: curlDomains,
-    runnable: async (domain) => {
-      return await curl({ url: domain, randomMethod: true, timeout: 1 });
-    },
-    threads,
-  });
-
-  await Promise.all([curlPromise, curlRandomMethodPromise]);
+  await Promise.all([...checkRedirectionPromises]);
 };
 
 const inputArgs = process.argv.slice(2);
+
 main({
   historyPath: inputArgs[0],
   threads: Number.isFinite(Number(inputArgs[1])) ? Number(inputArgs[1]) : 1,
