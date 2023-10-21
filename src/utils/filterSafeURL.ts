@@ -1,5 +1,9 @@
 export const filterSafeURL = (urlList: string[]): string[] =>
   urlList.filter((url) => {
+    if (url.includes("localhost")) {
+      return false;
+    }
+
     try {
       new URL(url);
       return true;
