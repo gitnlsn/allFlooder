@@ -26,23 +26,21 @@ const main = async ({ historyPath, ttl, threads }: MainProps) => {
 
   await rm({ file: outfile });
 
-  const curlPromise = consume({
-    stack: curlDomains,
-    runnable: async (domain) => {
-      await curl({ url: domain, timeout: 1 });
-    },
-    threads,
-  });
-
   const curlRandomMethodPromise = consume({
     stack: curlDomains,
     runnable: async (domain) => {
-      return await curl({ url: domain, randomMethod: true, timeout: 1 });
+      return await Promise.all([
+        curl({ url: domain, randomMethod: true, insecure: true, timeout: 1 }),
+        curl({ url: domain, randomMethod: true, insecure: true, timeout: 1 }),
+        curl({ url: domain, randomMethod: true, insecure: true, timeout: 1 }),
+        curl({ url: domain, randomMethod: true, insecure: true, timeout: 1 }),
+        curl({ url: domain, randomMethod: true, insecure: true, timeout: 1 }),
+      ]);
     },
     threads,
   });
 
-  await Promise.all([curlPromise, curlRandomMethodPromise]);
+  await Promise.all([curlRandomMethodPromise]);
 };
 
 const inputArgs = process.argv.slice(2);

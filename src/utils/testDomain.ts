@@ -8,7 +8,19 @@ export const testDomain = async (domain: string) =>
     url: domain,
     timeout: 10,
     insecure: false,
-  }).then(async () => {
+  }).then(async ({ stderr }) => {
+    if (stderr.length === 0) {
+      return {
+        status: "ok",
+        domain: "",
+        pingResult: "",
+        tracerouteResult: "",
+        cloudFlareNslookupResult: "",
+        googleNslookupResult: "",
+        retryCurlResult: "",
+      };
+    }
+
     const retryCurlPromise = curl({
       url: domain,
       timeout: 1,
@@ -57,6 +69,7 @@ export const testDomain = async (domain: string) =>
     ]);
 
     return {
+      status: "error",
       domain,
       pingResult,
       tracerouteResult,

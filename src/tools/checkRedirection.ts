@@ -33,7 +33,9 @@ const main = async ({ historyPath, ttl, threads }: MainProps) => {
     stack: allDomains,
     runnable: async (domain) => {
       const result = await testDomain(domain);
-      console.log(result);
+      if (result.status === "error") {
+        console.log(result);
+      }
     },
     threads,
   });
