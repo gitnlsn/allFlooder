@@ -23,6 +23,7 @@ export const consume = <ObjectType = any, Returnable = void>({
 
       const runnablePromise = runnable(nextValue);
       runnablePromise.catch(onError);
+      stackCopy.push(nextValue)
       await runnablePromise;
     }
   });
