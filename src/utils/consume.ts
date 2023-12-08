@@ -15,7 +15,7 @@ export const consume = <ObjectType = any, Returnable = void>({
 
   return Array.from(Array(threads).keys()).map(async () => {
     while (stackCopy.length > 0) {
-      const nextValue = stackCopy.pop();
+      const nextValue = stackCopy.shift();
 
       if (nextValue === undefined) {
         continue;
